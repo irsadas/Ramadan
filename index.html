@@ -1,0 +1,483 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+    <title>Ramadan Pro | Ranchi</title>
+    
+    <!-- Premium Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link href="https://fonts.googleapis.com/css2?family=Amiri:wght@400;700&family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+    
+    <!-- Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+
+    <style>
+        :root {
+            --bg: #020617;
+            --card-bg: rgba(15, 23, 42, 0.9);
+            --gold: #D4AF37;
+            --gold-glow: rgba(212, 175, 55, 0.2);
+            --emerald: #10b981;
+            --indigo: #6366f1;
+            --text-main: #f8fafc;
+            --text-dim: #94a3b8;
+            --glass-border: rgba(255, 255, 255, 0.06);
+            --transition: all 0.2s ease-in-out;
+            --bottom-nav-h: 65px;
+        }
+
+        * { margin: 0; padding: 0; box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+
+        body {
+            font-family: 'Plus Jakarta Sans', sans-serif;
+            background-color: var(--bg);
+            color: var(--text-main);
+            min-height: 100vh;
+            overflow-x: hidden;
+            font-size: 14px; /* Smaller base font */
+            background: radial-gradient(circle at top right, #0f172a, #020617);
+        }
+
+        /* --- Navigation --- */
+        nav {
+            position: fixed;
+            z-index: 1000;
+            background: rgba(2, 6, 23, 0.95);
+            backdrop-filter: blur(10px);
+            border-top: 1px solid var(--glass-border);
+            bottom: 0; width: 100%; height: var(--bottom-nav-h);
+            display: flex; justify-content: space-around; align-items: center;
+            padding: 0 5px;
+        }
+
+        @media (min-width: 1025px) {
+            nav {
+                width: 260px; height: 100vh; top: 0; left: 0; bottom: auto;
+                flex-direction: column; border-top: none; border-right: 1px solid var(--glass-border);
+                padding: 2rem 1rem; justify-content: flex-start;
+            }
+            .content-area { margin-left: 260px; padding: 2rem !important; }
+            .nav-logo { display: flex !important; }
+            .nav-link { width: 100% !important; border-radius: 12px !important; margin-bottom: 5px; padding: 12px 15px !important; }
+            .nav-link span { display: inline !important; margin-left: 10px; }
+            .nav-footer { display: block !important; margin-top: auto; width: 100%; border-top: 1px solid var(--glass-border); padding-top: 1rem; }
+        }
+
+        .nav-logo { font-family: 'Amiri', serif; color: var(--gold); font-size: 1.4rem; display: none; text-decoration: none; margin-bottom: 2rem; font-weight: 700; }
+        .nav-link { color: var(--text-dim); text-decoration: none; display: flex; align-items: center; font-size: 0.85rem; padding: 10px; border-radius: 50%; transition: var(--transition); }
+        .nav-link.active { color: var(--gold); background: rgba(212, 175, 55, 0.1); }
+        .nav-link span { display: none; }
+        .nav-link i { font-size: 1.2rem; }
+        .nav-footer { display: none; }
+
+        /* --- Content Area --- */
+        .content-area { flex: 1; padding: 10px 10px calc(var(--bottom-nav-h) + 15px) 10px; width: 100%; }
+        .view { display: none; animation: fadeIn 0.3s ease; max-width: 800px; margin: 0 auto; }
+        .view.active { display: block; }
+
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(5px); } to { opacity: 1; transform: translateY(0); } }
+
+        /* --- Cards & Layout --- */
+        .card { 
+            background: var(--card-bg); border: 1px solid var(--glass-border); 
+            border-radius: 20px; padding: 15px; margin-bottom: 10px; 
+            box-shadow: 0 4px 20px rgba(0,0,0,0.2);
+        }
+
+        .hero-card { text-align: center; background: radial-gradient(circle at center, rgba(212, 175, 55, 0.08), transparent); }
+        .big-clock { font-size: 3rem; font-weight: 800; color: var(--gold); line-height: 1; margin: 5px 0; letter-spacing: -1px; }
+        .small-timer { font-size: 0.9rem; opacity: 0.5; font-weight: 600; }
+
+        .fasting-container { width: 100%; height: 6px; background: rgba(255,255,255,0.05); border-radius: 10px; margin-top: 12px; overflow: hidden; }
+        .fasting-progress { height: 100%; width: 0%; background: linear-gradient(90deg, var(--gold), var(--emerald)); transition: width 1s linear; }
+
+        .section-title { font-family: 'Amiri', serif; font-size: 1.2rem; color: var(--gold); margin-bottom: 10px; display: flex; align-items: center; gap: 8px; }
+
+        /* --- Prayer List --- */
+        .prayer-item { display: flex; justify-content: space-between; padding: 8px 0; border-bottom: 1px solid rgba(255,255,255,0.03); font-size: 0.9rem; }
+        .prayer-item:last-child { border-bottom: none; }
+        .p-time { color: var(--gold); font-weight: 700; }
+
+        /* --- Checklist --- */
+        .checklist-item { 
+            display: flex; align-items: center; gap: 10px; padding: 10px; 
+            background: rgba(255,255,255,0.02); border-radius: 12px; 
+            margin-bottom: 6px; cursor: pointer; font-size: 0.85rem;
+        }
+        .checklist-item.checked { border-color: var(--emerald); background: rgba(16, 185, 129, 0.05); }
+        .checklist-item.checked span { text-decoration: line-through; opacity: 0.4; }
+
+        /* --- Quran Player --- */
+        .quran-box { background: rgba(0,0,0,0.3); padding: 15px; border-radius: 18px; border: 1px solid var(--glass-border); }
+        .surah-name { font-family: 'Amiri', serif; font-size: 1.5rem; color: var(--gold); margin: 5px 0; }
+        .quran-controls { display: flex; justify-content: center; align-items: center; gap: 15px; margin-top: 10px; }
+        .q-btn { background: rgba(255,255,255,0.05); border: 1px solid var(--glass-border); color: white; width: 40px; height: 40px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 1rem; }
+        .q-btn.play { width: 50px; height: 50px; background: var(--indigo); border: none; font-size: 1.2rem; }
+
+        /* --- AI Elements --- */
+        .ai-input { width: 100%; background: rgba(255,255,255,0.05); border: 1px solid var(--glass-border); padding: 12px 15px; border-radius: 12px; color: white; font-size: 0.9rem; outline: none; }
+        .ai-box { margin-top: 10px; background: rgba(0,0,0,0.2); padding: 12px; border-radius: 12px; font-size: 0.85rem; line-height: 1.5; color: var(--text-dim); min-height: 50px; }
+
+        /* --- Timetable --- */
+        .table-wrapper { overflow-x: auto; -webkit-overflow-scrolling: touch; border-radius: 12px; }
+        .ramadan-table { width: 100%; border-collapse: collapse; min-width: 400px; font-size: 0.8rem; }
+        .ramadan-table th { padding: 10px; color: var(--gold); border-bottom: 1px solid var(--glass-border); text-align: left; }
+        .ramadan-table td { padding: 10px; border-bottom: 1px solid rgba(255,255,255,0.02); }
+        .ramadan-table tr.today { background: rgba(212, 175, 55, 0.1); color: var(--gold); font-weight: 700; border-left: 3px solid var(--gold); }
+
+        #notification { 
+            position: fixed; top: 10px; left: 50%; transform: translateX(-50%); 
+            background: var(--emerald); color: white; padding: 8px 20px; 
+            border-radius: 20px; z-index: 2000; font-size: 0.75rem; font-weight: 600;
+            display: none; box-shadow: 0 5px 15px rgba(0,0,0,0.4);
+        }
+
+        .loading-dots:after { content: '.'; animation: dots 1.5s infinite; }
+        @keyframes dots { 0% { content: '.'; } 33% { content: '..'; } 66% { content: '...'; } }
+
+        .btn-small { padding: 6px 12px; border-radius: 8px; font-size: 0.75rem; font-weight: 700; cursor: pointer; border: none; }
+        .btn-gold { background: var(--gold); color: black; }
+        .btn-indigo { background: var(--indigo); color: white; }
+    </style>
+</head>
+<body>
+
+    <div id="notification"></div>
+
+    <nav>
+        <a href="#" class="nav-logo">Ramadan Pro</a>
+        <a class="nav-link active" onclick="switchView('home', this)"><i class="fas fa-home"></i><span>Home</span></a>
+        <a class="nav-link" onclick="switchView('ibadah', this)"><i class="fas fa-star"></i><span>Ibadah</span></a>
+        <a class="nav-link" onclick="switchView('explorer', this)"><i class="fas fa-brain"></i><span>AI</span></a>
+        <a class="nav-link" onclick="switchView('calendar', this)"><i class="fas fa-calendar-alt"></i><span>Table</span></a>
+        <div class="nav-footer">
+            <div class="nav-link" id="adhanToggle" onclick="toggleAdhan()"><i class="fas fa-volume-up"></i><span>Adhan On</span></div>
+            <div class="nav-link" onclick="syncAudio()"><i class="fas fa-sync"></i><span>Sync Sound</span></div>
+        </div>
+    </nav>
+
+    <main class="content-area">
+        
+        <!-- HOME VIEW -->
+        <section id="view-home" class="view active">
+            <div class="card hero-card">
+                <span style="text-transform: uppercase; letter-spacing: 2px; color: var(--text-dim); font-size: 0.6rem;">Next: <span id="next-prayer-name">--</span></span>
+                <div class="big-clock" id="countdown-timer">00:00:00</div>
+                <div class="small-timer" id="current-clock">00:00:00</div>
+                <div class="fasting-container"><div class="fasting-progress" id="fasting-progress"></div></div>
+                <p style="margin-top: 8px; font-size: 0.7rem; color: var(--text-dim);">Ranchi Fasting Progress</p>
+            </div>
+
+            <div class="card" style="border-left: 3px solid var(--indigo);">
+                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 5px;">
+                    <span class="section-title" style="margin:0;"><i class="fas fa-sparkles"></i> AI Insight</span>
+                    <button id="tts-btn" class="btn-small btn-indigo" style="display:none;" onclick="speakReflection()"><i class="fas fa-volume-up"></i></button>
+                </div>
+                <div id="reflection-content" style="font-size: 0.8rem; font-style: italic; opacity: 0.9; margin-bottom: 10px;">Seeking wisdom for your day...</div>
+                <button class="btn-small btn-indigo" onclick="generateReflection()">Generate</button>
+            </div>
+
+            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 8px;">
+                <div class="card">
+                    <h3 class="section-title">Timings</h3>
+                    <div id="prayer-list"></div>
+                </div>
+                <div class="card" style="text-align: center;">
+                    <div style="font-size: 1.5rem; font-weight: 800;" id="temp-display">--°C</div>
+                    <div style="font-size: 0.6rem; opacity: 0.5; margin-bottom: 10px;">Ranchi, IN</div>
+                    <hr style="border:none; border-top: 1px solid var(--glass-border); margin: 8px 0;">
+                    <div id="hijri-display" style="font-family: 'Amiri', serif; font-size: 1rem; color: var(--gold);">Loading...</div>
+                </div>
+            </div>
+        </section>
+
+        <!-- IBADAH VIEW -->
+        <section id="view-ibadah" class="view">
+            <div class="card">
+                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px;">
+                    <h3 class="section-title" style="margin:0;">Checklist</h3>
+                    <span id="checklist-progress" style="font-size: 0.7rem; color: var(--emerald);">0/0</span>
+                </div>
+                <div id="checklist-root"></div>
+                <button class="btn-small btn-gold" style="width: 100%; margin-top: 10px; background: transparent; color: var(--gold); border: 1px solid var(--gold);" onclick="resetChecklist()">Reset</button>
+            </div>
+
+            <div class="card" style="text-align: center;">
+                <h3 class="section-title" style="justify-content: center;">Quran Player</h3>
+                <select id="surah-select" onchange="changeSurah(this.value)" style="width: 100%; padding: 8px; border-radius: 8px; background: #0f172a; color: white; border: 1px solid var(--glass-border); margin-bottom: 10px; font-size: 0.8rem;"></select>
+                <div class="quran-box">
+                    <div id="playing-surah-name" class="surah-name">Surah Al-Fatiha</div>
+                    <div class="quran-controls">
+                        <button class="q-btn" onclick="prevSurah()"><i class="fas fa-backward"></i></button>
+                        <button class="q-btn play" id="quran-play-btn" onclick="toggleQuran()"><i class="fas fa-play"></i></button>
+                        <button class="q-btn" onclick="nextSurah()"><i class="fas fa-forward"></i></button>
+                    </div>
+                </div>
+                <div style="margin-top: 10px; display: flex; justify-content: center; align-items: center; gap: 10px;">
+                    <span style="font-size: 0.8rem;">Juz: <strong id="juz-val" style="color: var(--gold);">1</strong></span>
+                    <button class="btn-small btn-gold" onclick="incrementJuz()">+1</button>
+                </div>
+            </div>
+
+            <div class="card">
+                <h3 class="section-title"><i class="fas fa-heart"></i> AI Dua</h3>
+                <textarea id="dua-input" placeholder="How do you feel?" class="ai-input" style="height: 60px; resize: none;"></textarea>
+                <button class="btn-small btn-indigo" style="width: 100%; margin-top: 8px;" onclick="generateDua()">Craft Dua</button>
+                <div id="dua-result" class="ai-box" style="display:none; font-style: italic;"></div>
+            </div>
+        </section>
+
+        <!-- EXPLORER VIEW -->
+        <section id="view-explorer" class="view">
+            <div class="card">
+                <h2 class="section-title">Knowledge Explorer</h2>
+                <input type="text" id="ai-query" class="ai-input" placeholder="Ask anything about Ramadan...">
+                <div id="ai-response-box" class="ai-box" style="min-height: 200px;">Consult Gemini for spiritual answers.</div>
+            </div>
+        </section>
+
+        <!-- CALENDAR VIEW -->
+        <section id="view-calendar" class="view">
+            <div class="card">
+                <h2 class="section-title">Ranchi Ramadan Table</h2>
+                <div class="table-wrapper">
+                    <div id="calendar-table-container"></div>
+                </div>
+            </div>
+        </section>
+    </main>
+
+    <audio id="audio-adhan" preload="auto"></audio>
+    <audio id="audio-quran" preload="auto"></audio>
+
+    <script>
+        const apiKey = "";
+        const geminiModel = "gemini-2.5-flash-preview-09-2025";
+        const ttsModel = "gemini-2.5-flash-preview-tts";
+        const ranchiCoords = { lat: 23.3441, lon: 85.3096 };
+        const surahNames = ["Al-Fatiha","Al-Baqarah","Al-Imran","An-Nisa","Al-Ma'idah","Al-An'am","Al-A'raf","Al-Anfal","At-Tawbah","Yunus","Hud","Yusuf","Ar-Ra'd","Ibrahim","Al-Hijr","An-Nahl","Al-Isra","Al-Kahf","Maryam","Ta-Ha","Al-Anbiya","Al-Hajj","Al-Mu'minun","An-Nur","Al-Furqan","Ash-Shu'ara","An-Naml","Al-Qasas","Al-Ankabut","Ar-Rum","Luqman","As-Sajdah","Al-Ahzab","Saba","Fatir","Ya-Sin","As-Saffat","Sad","Az-Zumar","Ghafir","Fussilat","Ash-Shura","Az-Zukhruf","Ad-Dukhan","Al-Jathiyah","Al-Ahqaf","Muhammad","Al-Fath","Al-Hujurat","Qaf","Adh-Dhariyat","At-Tur","An-Najm","Al-Qamar","Ar-Rahman","Al-Waqi'ah","Al-Hadid","Al-Mujadilah","Al-Hashr","Al-Mumtahanah","As-Saff","Al-Jumu'ah","Al-Munafiqun","At-Taghabun","At-Talaq","At-Tahrim","Al-Mulk","Al-Qalam","Al-Haqqah","Al-Ma'arij","Nuh","Al-Jinn","Al-Muzzammil","Al-Muddatthir","Al-Qiyamah","Al-Insan","Al-Mursalat","An-Naba","An-Nazi'at","Abasa","At-Takwir","Al-Infitar","Al-Mutaffifin","Al-Inshiqaq","Al-Buruj","At-Tariq","Al-A'la","Al-Ghashiyah","Al-Fajr","Al-Balad","Ash-Shams","Al-Layl","Ad-Duha","Ash-Sharh","At-Tin","Al-Alaq","Al-Qadr","Al-Bayyinah","Az-Zalzalah","Al-Adiyat","Al-Qari'ah","At-Takathur","Al-Asr","Al-Humazah","Al-Fil","Quraysh","Al-Ma'un","Al-Kawthar","Al-Kafirun","An-Nasr","Al-Masad","Al-Ikhlas","Al-Falaq","An-Nas"];
+
+        let state = {
+            prayerData: null, adhanEnabled: true, currentSurah: 1, playPromise: null,
+            checklist: JSON.parse(localStorage.getItem('rp_cl_v3')) || [
+                { id: 'c1', label: '5 Daily Salah', checked: false },
+                { id: 'c2', label: 'Tarawih', checked: false },
+                { id: 'c3', label: 'Quran', checked: false },
+                { id: 'c4', label: 'Adhkar', checked: false },
+                { id: 'c5', label: 'Sadaqah', checked: false }
+            ],
+            juz: parseInt(localStorage.getItem('rp_juz')) || 1
+        };
+
+        // --- CORE FUNCTIONS ---
+        function switchView(id, link) {
+            document.querySelectorAll('.view').forEach(v => v.classList.remove('active'));
+            document.getElementById(`view-${id}`).classList.add('active');
+            document.querySelectorAll('.nav-link').forEach(l => l.classList.remove('active'));
+            if(link) link.classList.add('active');
+            window.scrollTo(0,0);
+        }
+
+        function notify(msg) {
+            const b = document.getElementById('notification');
+            b.innerText = msg; b.style.display = 'block';
+            setTimeout(() => b.style.display = 'none', 3000);
+        }
+
+        async function safePlay(audioEl) {
+            if (!audioEl) return;
+            try {
+                if (state.playPromise) await state.playPromise;
+                state.playPromise = audioEl.play();
+                await state.playPromise;
+            } catch (e) { if (e.name !== 'AbortError') console.warn("Audio blocked"); }
+            finally { state.playPromise = null; }
+        }
+
+        function initQuran() {
+            const select = document.getElementById('surah-select');
+            surahNames.forEach((n, i) => {
+                const o = document.createElement('option');
+                o.value = i + 1; o.innerText = `${i+1}. ${n}`;
+                select.appendChild(o);
+            });
+            updateQuranPlayer(false);
+        }
+
+        async function updateQuranPlayer(play = true) {
+            const a = document.getElementById('audio-quran');
+            const num = state.currentSurah;
+            a.src = `https://server8.mp3quran.net/afs/${num.toString().padStart(3,'0')}.mp3`;
+            document.getElementById('playing-surah-name').innerText = surahNames[num-1];
+            document.getElementById('surah-select').value = num;
+            if(play) { await safePlay(a); document.getElementById('quran-play-btn').innerHTML = '<i class="fas fa-pause"></i>'; }
+        }
+
+        function toggleQuran() {
+            const a = document.getElementById('audio-quran');
+            if(a.paused) { a.play(); document.getElementById('quran-play-btn').innerHTML = '<i class="fas fa-pause"></i>'; }
+            else { a.pause(); document.getElementById('quran-play-btn').innerHTML = '<i class="fas fa-play"></i>'; }
+        }
+
+        function nextSurah() { state.currentSurah = (state.currentSurah < 114) ? state.currentSurah + 1 : 1; updateQuranPlayer(); }
+        function prevSurah() { state.currentSurah = (state.currentSurah > 1) ? state.currentSurah - 1 : 114; updateQuranPlayer(); }
+        function changeSurah(v) { state.currentSurah = parseInt(v); updateQuranPlayer(); }
+        document.getElementById('audio-quran').onended = nextSurah;
+
+        async function callGemini(q, sys) {
+            const url = `https://generativelanguage.googleapis.com/v1beta/models/${geminiModel}:generateContent?key=${apiKey}`;
+            try {
+                const r = await fetch(url, { method: 'POST', body: JSON.stringify({ contents: [{ parts: [{ text: q }] }], systemInstruction: { parts: [{ text: sys }] } }) });
+                const d = await r.json(); return d.candidates[0].content.parts[0].text;
+            } catch(e) { return null; }
+        }
+
+        async function generateReflection() {
+            const b = document.getElementById('reflection-content');
+            b.innerHTML = `<span class="loading-dots">Thinking</span>`;
+            const res = await callGemini("Short poetic Ramadan thought.", "Spiritual mentor.");
+            if (res) { b.innerText = res; document.getElementById('tts-btn').style.display = 'block'; }
+        }
+
+        async function generateDua() {
+            const r = document.getElementById('dua-result');
+            const i = document.getElementById('dua-input').value;
+            if(!i) return;
+            r.style.display = 'block'; r.innerHTML = `<span class="loading-dots">Crafting</span>`;
+            const res = await callGemini(`Dua for: ${i}`, "Compassionate mentor.");
+            if (res) r.innerText = res;
+        }
+
+        async function speakReflection() {
+            const t = document.getElementById('reflection-content').innerText;
+            const url = `https://generativelanguage.googleapis.com/v1beta/models/${ttsModel}:generateContent?key=${apiKey}`;
+            try {
+                const r = await fetch(url, { method: 'POST', body: JSON.stringify({ contents: [{ parts: [{ text: t }] }], generationConfig: { responseModalities: ["AUDIO"], speechConfig: { voiceConfig: { prebuiltVoiceConfig: { voiceName: "Puck" } } } }, model: ttsModel }) });
+                const d = await r.json();
+                const pcm = d.candidates[0].content.parts[0].inlineData.data;
+                const blob = pcmToWav(pcm, 24000);
+                await safePlay(new Audio(URL.createObjectURL(blob)));
+            } catch(e) { notify("Voice error"); }
+        }
+
+        function pcmToWav(b64, r) {
+            const bin = atob(b64); const buf = new ArrayBuffer(44 + bin.length); const v = new DataView(buf);
+            const w = (o, s) => { for(let i=0; i<s.length; i++) v.setUint8(o+i, s.charCodeAt(i)); };
+            w(0, 'RIFF'); v.setUint32(4, 36 + bin.length, true); w(8, 'WAVE'); w(12, 'fmt '); v.setUint32(16, 16, true); v.setUint16(20, 1, true); v.setUint16(22, 1, true); v.setUint32(24, r, true); v.setUint32(28, r*2, true); v.setUint16(32, 2, true); v.setUint16(34, 16, true); w(36, 'data'); v.setUint32(40, bin.length, true);
+            for(let i=0; i<bin.length; i++) v.setUint8(44+i, bin.charCodeAt(i)); return new Blob([buf], { type: 'audio/wav' });
+        }
+
+        function renderChecklist() {
+            const root = document.getElementById('checklist-root');
+            root.innerHTML = state.checklist.map(i => `
+                <div class="checklist-item ${i.checked ? 'checked' : ''}" onclick="toggleCheckItem('${i.id}')">
+                    <i class="${i.checked ? 'fas fa-check-circle' : 'far fa-circle'}" style="color:${i.checked ? 'var(--emerald)' : 'var(--text-dim)'}"></i>
+                    <span>${i.label}</span>
+                </div>
+            `).join('');
+            document.getElementById('checklist-progress').innerText = `${state.checklist.filter(i => i.checked).length}/${state.checklist.length}`;
+            localStorage.setItem('rp_cl_v3', JSON.stringify(state.checklist));
+        }
+        function toggleCheckItem(id) { state.checklist = state.checklist.map(i => i.id === id ? {...i, checked: !i.checked} : i); renderChecklist(); }
+        function resetChecklist() { state.checklist = state.checklist.map(i => ({...i, checked: false})); renderChecklist(); }
+        function incrementJuz() { state.juz = state.juz < 30 ? state.juz + 1 : 1; document.getElementById('juz-val').innerText = state.juz; localStorage.setItem('rp_juz', state.juz); }
+
+        async function refreshData() {
+            try {
+                const ts = Math.floor(Date.now()/1000);
+                const res = await fetch(`https://api.aladhan.com/v1/timings/${ts}?latitude=${ranchiCoords.lat}&longitude=${ranchiCoords.lon}&method=1`);
+                const json = await res.json();
+                state.prayerData = json.data;
+                const h = state.prayerData.date.hijri;
+                document.getElementById('hijri-display').innerText = `${h.day} ${h.month.en}`;
+                const wRes = await fetch(`https://api.open-meteo.com/v1/forecast?latitude=${ranchiCoords.lat}&longitude=${ranchiCoords.lon}&current_weather=true`);
+                const wData = await wRes.json();
+                document.getElementById('temp-display').innerText = `${Math.round(wData.current_weather.temperature)}°C`;
+                renderPrayers();
+                renderRamadanTable(h.year);
+            } catch(e) { console.error(e); }
+        }
+
+        function renderPrayers() {
+            const map = [{k:'Fajr',l:'Fajr'},{k:'Sunrise',l:'Sunrise'},{k:'Dhuhr',l:'Dhuhr'},{k:'Asr',l:'Asr'},{k:'Maghrib',l:'Maghrib'},{k:'Isha',l:'Isha'}];
+            document.getElementById('prayer-list').innerHTML = map.map(p => `<div class="prayer-item"><span>${p.l}</span><span class="p-time">${state.prayerData.timings[p.k]}</span></div>`).join('');
+        }
+
+        async function renderRamadanTable(year) {
+            const cont = document.getElementById('calendar-table-container');
+            try {
+                const res = await fetch(`https://api.aladhan.com/v1/hijriCalendarByCity/${year}/9?city=Ranchi&country=India&method=1`);
+                const json = await res.json();
+                let html = `<table class="ramadan-table"><tr><th>Day</th><th>Date</th><th>Sehri</th><th>Iftar</th></tr>`;
+                const todayG = new Date().getDate();
+                const todayM = new Date().getMonth() + 1;
+                json.data.forEach(d => {
+                    const active = parseInt(d.gregorian.day) === todayG && d.gregorian.month.number === todayM;
+                    html += `<tr class="${active ? 'today' : ''}"><td>Day ${d.hijri.day}</td><td>${d.gregorian.day} ${d.gregorian.month.en.slice(0,3)}</td><td>${d.timings.Fajr.split(' ')[0]}</td><td>${d.timings.Maghrib.split(' ')[0]}</td></tr>`;
+                });
+                cont.innerHTML = html + `</table>`;
+            } catch(e) { cont.innerHTML = "Unavailable"; }
+        }
+
+        function tick() {
+            const now = new Date();
+            document.getElementById('current-clock').innerText = now.toLocaleTimeString('en-GB');
+            if(!state.prayerData) return;
+            const pList = ['Fajr', 'Dhuhr', 'Asr', 'Maghrib', 'Isha'];
+            let target = null, name = "";
+            for(let k of pList) {
+                const [h,m] = state.prayerData.timings[k].split(':');
+                const d = new Date(); d.setHours(h,m,0);
+                if(d > now) { target = d; name = (k === 'Maghrib' ? 'Iftar' : k); break; }
+            }
+            if(!target) {
+                const [h,m] = state.prayerData.timings.Fajr.split(':');
+                target = new Date(); target.setDate(target.getDate()+1); target.setHours(h,m,0);
+                name = "Fajr (Tomorrow)";
+            }
+            const diff = target - now;
+            const hh = Math.floor(diff/3600000), mm = Math.floor((diff/60000)%60), ss = Math.floor((diff/1000)%60);
+            document.getElementById('countdown-timer').innerText = `${String(hh).padStart(2,'0')}:${String(mm).padStart(2,'0')}:${String(ss).padStart(2,'0')}`;
+            document.getElementById('next-prayer-name').innerText = name;
+            const [fh, fm] = state.prayerData.timings.Fajr.split(':');
+            const [mh, mm_] = state.prayerData.timings.Maghrib.split(':');
+            const sT = new Date(); sT.setHours(fh, fm, 0); const iT = new Date(); iT.setHours(mh, mm_, 0);
+            let pct = (now > sT && now < iT) ? ((now-sT)/(iT-sT))*100 : (now >= iT ? 100 : 0);
+            document.getElementById('fasting-progress').style.width = pct + "%";
+            if(state.adhanEnabled && now.getSeconds() === 0) {
+                const cur = now.toLocaleTimeString('en-GB', {hour:'2-digit', minute:'2-digit'});
+                if(pList.some(k => state.prayerData.timings[k] === cur)) {
+                    const a = document.getElementById('audio-adhan');
+                    a.src = "https://archive.org/download/adhan-azan-azan-adhan/Adhan.mp3";
+                    safePlay(a);
+                }
+            }
+        }
+
+        async function syncAudio() { 
+            const a = document.getElementById('audio-adhan'); const q = document.getElementById('audio-quran'); 
+            try { await a.play(); a.pause(); await q.play(); q.pause(); notify("Audio Synced"); } catch (e) {}
+        }
+
+        function toggleAdhan() {
+            state.adhanEnabled = !state.adhanEnabled;
+            document.getElementById('adhanToggle').innerHTML = state.adhanEnabled ? '<i class="fas fa-volume-up"></i><span>Adhan On</span>' : '<i class="fas fa-volume-mute"></i><span>Adhan Off</span>';
+            notify(state.adhanEnabled ? 'Adhan Enabled' : 'Adhan Disabled');
+        }
+
+        async function init() {
+            renderChecklist(); initQuran(); refreshData(); setInterval(tick, 1000);
+            document.getElementById('ai-query').onkeypress = async (e) => { 
+                if(e.key === 'Enter') { 
+                    const b = document.getElementById('ai-response-box'); b.innerHTML = `<span class="loading-dots">Searching</span>`; 
+                    const res = await callGemini(e.target.value, "Scholar.");
+                    if(res) b.innerText = res;
+                } 
+            }
+        }
+
+        init();
+    </script>
+</body>
+</html>
