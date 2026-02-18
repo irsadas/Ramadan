@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
-    <title>Ramadan Pro | Ranchi</title>
+    <title>Ramadan Pro</title>
     
     <!-- Premium Fonts -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -11,6 +11,9 @@
     
     <!-- Icons -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+
+    <!-- Libraries -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
 
     <style>
         :root {
@@ -125,6 +128,9 @@
         .ramadan-table th { padding: 10px; color: var(--gold); border-bottom: 1px solid var(--glass-border); text-align: left; }
         .ramadan-table td { padding: 10px; border-bottom: 1px solid rgba(255,255,255,0.02); }
         .ramadan-table tr.today { background: rgba(212, 175, 55, 0.1); color: var(--gold); font-weight: 700; border-left: 3px solid var(--gold); }
+        .ramadan-table tr.last-10 { background: rgba(99, 102, 241, 0.08); border-left: 3px solid var(--indigo); }
+        .ramadan-table tr.today.last-10 { background: rgba(212, 175, 55, 0.15); border-left: 3px solid var(--gold); }
+        .ramadan-table tr.reminder-set { background: rgba(16, 185, 129, 0.1); }
 
         #notification { 
             position: fixed; top: 10px; left: 50%; transform: translateX(-50%); 
@@ -139,6 +145,19 @@
         .btn-small { padding: 6px 12px; border-radius: 8px; font-size: 0.75rem; font-weight: 700; cursor: pointer; border: none; }
         .btn-gold { background: var(--gold); color: black; }
         .btn-indigo { background: var(--indigo); color: white; }
+
+        /* --- Settings Modal --- */
+        .modal { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.8); z-index: 3000; align-items: center; justify-content: center; backdrop-filter: blur(5px); }
+        .modal.active { display: flex; animation: fadeIn 0.2s ease; }
+        .modal-content { background: #0f172a; border: 1px solid var(--glass-border); padding: 25px; border-radius: 20px; width: 90%; max-width: 320px; text-align: center; box-shadow: 0 10px 30px rgba(0,0,0,0.5); }
+        .adjust-controls { display: flex; align-items: center; justify-content: center; gap: 20px; margin: 20px 0; }
+        .adj-btn { width: 45px; height: 45px; border-radius: 50%; border: 1px solid var(--glass-border); background: rgba(255,255,255,0.05); color: white; font-size: 1.2rem; cursor: pointer; display: flex; align-items: center; justify-content: center; transition: 0.2s; }
+        .adj-btn:active { transform: scale(0.95); background: var(--indigo); }
+
+        /* Zakat View */
+        .zakat-input { width: 100%; background: rgba(255,255,255,0.05); border: 1px solid var(--glass-border); border-radius: 12px; padding: 12px; color: white; margin-bottom: 10px; outline: none; font-size: 0.9rem; }
+        .zakat-result { background: rgba(212, 175, 55, 0.1); padding: 20px; border-radius: 15px; text-align: center; border: 1px solid var(--gold); margin-top: 15px; }
+        .subtle-wish { text-align: center; font-size: 0.8rem; color: var(--text-dim); margin-top: 20px; padding: 10px; font-style: italic; opacity: 0.6; }
     </style>
 </head>
 <body>
@@ -149,8 +168,10 @@
         <a href="#" class="nav-logo">Ramadan Pro</a>
         <a class="nav-link active" onclick="switchView('home', this)"><i class="fas fa-home"></i><span>Home</span></a>
         <a class="nav-link" onclick="switchView('ibadah', this)"><i class="fas fa-star"></i><span>Ibadah</span></a>
+        <a class="nav-link" onclick="switchView('zakat', this)"><i class="fas fa-hand-holding-heart"></i><span>Zakat</span></a>
         <a class="nav-link" onclick="switchView('explorer', this)"><i class="fas fa-brain"></i><span>AI</span></a>
         <a class="nav-link" onclick="switchView('calendar', this)"><i class="fas fa-calendar-alt"></i><span>Table</span></a>
+        <a class="nav-link" onclick="openSettings()"><i class="fas fa-cog"></i><span>Settings</span></a>
         <div class="nav-footer">
             <div class="nav-link" id="adhanToggle" onclick="toggleAdhan()"><i class="fas fa-volume-up"></i><span>Adhan On</span></div>
             <div class="nav-link" onclick="syncAudio()"><i class="fas fa-sync"></i><span>Sync Sound</span></div>
@@ -166,7 +187,7 @@
                 <div class="big-clock" id="countdown-timer">00:00:00</div>
                 <div class="small-timer" id="current-clock">00:00:00</div>
                 <div class="fasting-container"><div class="fasting-progress" id="fasting-progress"></div></div>
-                <p style="margin-top: 8px; font-size: 0.7rem; color: var(--text-dim);">Ranchi Fasting Progress</p>
+                <p id="location-label" style="margin-top: 8px; font-size: 0.7rem; color: var(--text-dim);">Fasting Progress</p>
             </div>
 
             <div class="card" style="border-left: 3px solid var(--indigo);">
@@ -185,11 +206,12 @@
                 </div>
                 <div class="card" style="text-align: center;">
                     <div style="font-size: 1.5rem; font-weight: 800;" id="temp-display">--°C</div>
-                    <div style="font-size: 0.6rem; opacity: 0.5; margin-bottom: 10px;">Ranchi, IN</div>
+                    <div id="location-sub" style="font-size: 0.6rem; opacity: 0.5; margin-bottom: 10px;">Loading Location...</div>
                     <hr style="border:none; border-top: 1px solid var(--glass-border); margin: 8px 0;">
                     <div id="hijri-display" style="font-family: 'Amiri', serif; font-size: 1rem; color: var(--gold);">Loading...</div>
                 </div>
             </div>
+            <div class="subtle-wish">Warm wishes for a blessed Ramadan to all. — Issam</div>
         </section>
 
         <!-- IBADAH VIEW -->
@@ -201,6 +223,16 @@
                 </div>
                 <div id="checklist-root"></div>
                 <button class="btn-small btn-gold" style="width: 100%; margin-top: 10px; background: transparent; color: var(--gold); border: 1px solid var(--gold);" onclick="resetChecklist()">Reset</button>
+            </div>
+
+            <div class="card" style="text-align: center;">
+                <h3 class="section-title" style="justify-content: center;"><i class="fas fa-calendar-times"></i> Missed Fasts</h3>
+                <p style="font-size: 0.8rem; color: var(--text-dim); margin-bottom: 15px;">Track days to make up later (Qada).</p>
+                <div style="display: flex; justify-content: center; align-items: center; gap: 20px;">
+                    <button class="adj-btn" onclick="updateMissed(-1)"><i class="fas fa-minus"></i></button>
+                    <span id="missed-val" style="font-size: 2rem; font-weight: 800; color: var(--gold);">0</span>
+                    <button class="adj-btn" onclick="updateMissed(1)"><i class="fas fa-plus"></i></button>
+                </div>
             </div>
 
             <div class="card" style="text-align: center;">
@@ -228,6 +260,36 @@
             </div>
         </section>
 
+        <!-- ZAKAT VIEW -->
+        <section id="view-zakat" class="view">
+            <div class="card">
+                <h2 class="section-title"><i class="fas fa-calculator"></i> Zakat Calculator</h2>
+                <p style="font-size: 0.8rem; color: var(--text-dim); margin-bottom: 15px;">Calculate 2.5% of your eligible wealth.</p>
+                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px;">
+                    <div>
+                        <label style="font-size: 0.7rem; color: var(--gold);">Cash & Savings</label>
+                        <input type="number" id="z-savings" class="zakat-input" placeholder="0" oninput="calcZakat()">
+                    </div>
+                    <div>
+                        <label style="font-size: 0.7rem; color: var(--gold);">Gold Value</label>
+                        <input type="number" id="z-gold" class="zakat-input" placeholder="0" oninput="calcZakat()">
+                    </div>
+                    <div>
+                        <label style="font-size: 0.7rem; color: var(--gold);">Silver Value</label>
+                        <input type="number" id="z-silver" class="zakat-input" placeholder="0" oninput="calcZakat()">
+                    </div>
+                    <div>
+                        <label style="font-size: 0.7rem; color: var(--gold);">Investments</label>
+                        <input type="number" id="z-invest" class="zakat-input" placeholder="0" oninput="calcZakat()">
+                    </div>
+                </div>
+                <div class="zakat-result">
+                    <p style="font-size: 0.75rem; color: var(--text-dim);">Total Zakat Payable</p>
+                    <h1 id="zakat-total" style="color: var(--gold); font-size: 2.5rem; margin: 5px 0;">0.00</h1>
+                </div>
+            </div>
+        </section>
+
         <!-- EXPLORER VIEW -->
         <section id="view-explorer" class="view">
             <div class="card">
@@ -240,13 +302,48 @@
         <!-- CALENDAR VIEW -->
         <section id="view-calendar" class="view">
             <div class="card">
-                <h2 class="section-title">Ranchi Ramadan Table</h2>
+                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px;">
+                    <h2 class="section-title" id="table-title" style="margin:0;">Ramadan</h2>
+                    <div style="display: flex; gap: 5px;">
+                        <select id="year-selector" class="btn-small" style="background: var(--bg); color: white; border: 1px solid var(--glass-border); outline: none;" onchange="renderRamadanTable(this.value)">
+                            <option value="1446">2025</option>
+                            <option value="1447">2026</option>
+                            <option value="1448">2027</option>
+                        </select>
+                        <button class="btn-small btn-gold" onclick="downloadCalendar()"><i class="fas fa-download"></i> Save</button>
+                    </div>
+                </div>
                 <div class="table-wrapper">
                     <div id="calendar-table-container"></div>
                 </div>
             </div>
         </section>
     </main>
+
+    <!-- SETTINGS MODAL -->
+    <div id="settings-modal" class="modal">
+        <div class="modal-content">
+            <h3 class="section-title" style="justify-content: center;">Hijri Adjustment</h3>
+            <p style="color: var(--text-dim); font-size: 0.85rem;">Adjust if the date is off by 1-2 days.</p>
+            <div class="adjust-controls">
+                <button class="adj-btn" onclick="adjustHijri(-1)"><i class="fas fa-minus"></i></button>
+                <span id="hijri-adj-val" style="font-size: 1.5rem; font-weight: 700; color: var(--gold); width: 40px;">0</span>
+                <button class="adj-btn" onclick="adjustHijri(1)"><i class="fas fa-plus"></i></button>
+            </div>
+            
+            <hr style="border:none; border-top: 1px solid var(--glass-border); margin: 15px 0;">
+            <h3 class="section-title" style="justify-content: center; font-size: 1rem;">Calculation Method</h3>
+            <select id="calc-method-select" class="ai-input" style="margin-bottom: 20px; background: #020617;" onchange="changeMethod(this.value)">
+                <option value="1">Karachi (Hanfi)</option>
+                <option value="2">ISNA (North America)</option>
+                <option value="3">MWL (Europe)</option>
+                <option value="4">Makkah (Umm al-Qura)</option>
+                <option value="5">Egypt (General Authority)</option>
+            </select>
+
+            <button class="btn-small btn-indigo" style="width: 100%; padding: 12px;" onclick="closeSettings()">Save & Close</button>
+        </div>
+    </div>
 
     <audio id="audio-adhan" preload="auto"></audio>
     <audio id="audio-quran" preload="auto"></audio>
@@ -255,11 +352,11 @@
         const apiKey = "";
         const geminiModel = "gemini-2.5-flash-preview-09-2025";
         const ttsModel = "gemini-2.5-flash-preview-tts";
-        const ranchiCoords = { lat: 23.3441, lon: 85.3096 };
+        let userCoords = { lat: 23.3441, lon: 85.3096 }; // Default to Ranchi
         const surahNames = ["Al-Fatiha","Al-Baqarah","Al-Imran","An-Nisa","Al-Ma'idah","Al-An'am","Al-A'raf","Al-Anfal","At-Tawbah","Yunus","Hud","Yusuf","Ar-Ra'd","Ibrahim","Al-Hijr","An-Nahl","Al-Isra","Al-Kahf","Maryam","Ta-Ha","Al-Anbiya","Al-Hajj","Al-Mu'minun","An-Nur","Al-Furqan","Ash-Shu'ara","An-Naml","Al-Qasas","Al-Ankabut","Ar-Rum","Luqman","As-Sajdah","Al-Ahzab","Saba","Fatir","Ya-Sin","As-Saffat","Sad","Az-Zumar","Ghafir","Fussilat","Ash-Shura","Az-Zukhruf","Ad-Dukhan","Al-Jathiyah","Al-Ahqaf","Muhammad","Al-Fath","Al-Hujurat","Qaf","Adh-Dhariyat","At-Tur","An-Najm","Al-Qamar","Ar-Rahman","Al-Waqi'ah","Al-Hadid","Al-Mujadilah","Al-Hashr","Al-Mumtahanah","As-Saff","Al-Jumu'ah","Al-Munafiqun","At-Taghabun","At-Talaq","At-Tahrim","Al-Mulk","Al-Qalam","Al-Haqqah","Al-Ma'arij","Nuh","Al-Jinn","Al-Muzzammil","Al-Muddatthir","Al-Qiyamah","Al-Insan","Al-Mursalat","An-Naba","An-Nazi'at","Abasa","At-Takwir","Al-Infitar","Al-Mutaffifin","Al-Inshiqaq","Al-Buruj","At-Tariq","Al-A'la","Al-Ghashiyah","Al-Fajr","Al-Balad","Ash-Shams","Al-Layl","Ad-Duha","Ash-Sharh","At-Tin","Al-Alaq","Al-Qadr","Al-Bayyinah","Az-Zalzalah","Al-Adiyat","Al-Qari'ah","At-Takathur","Al-Asr","Al-Humazah","Al-Fil","Quraysh","Al-Ma'un","Al-Kawthar","Al-Kafirun","An-Nasr","Al-Masad","Al-Ikhlas","Al-Falaq","An-Nas"];
 
         let state = {
-            prayerData: null, adhanEnabled: true, currentSurah: 1, playPromise: null,
+            prayerData: null, adhanEnabled: true, currentSurah: 1, playPromise: null, hijriAdjustment: parseInt(localStorage.getItem('rp_adj')) || 0, calcMethod: parseInt(localStorage.getItem('rp_method')) || 1, missedFasts: parseInt(localStorage.getItem('rp_missed')) || 0,
             checklist: JSON.parse(localStorage.getItem('rp_cl_v3')) || [
                 { id: 'c1', label: '5 Daily Salah', checked: false },
                 { id: 'c2', label: 'Tarawih', checked: false },
@@ -381,21 +478,30 @@
         }
         function toggleCheckItem(id) { state.checklist = state.checklist.map(i => i.id === id ? {...i, checked: !i.checked} : i); renderChecklist(); }
         function resetChecklist() { state.checklist = state.checklist.map(i => ({...i, checked: false})); renderChecklist(); }
+        function updateMissed(v) {
+            state.missedFasts = Math.max(0, state.missedFasts + v);
+            document.getElementById('missed-val').innerText = state.missedFasts;
+            localStorage.setItem('rp_missed', state.missedFasts);
+        }
         function incrementJuz() { state.juz = state.juz < 30 ? state.juz + 1 : 1; document.getElementById('juz-val').innerText = state.juz; localStorage.setItem('rp_juz', state.juz); }
 
         async function refreshData() {
             try {
                 const ts = Math.floor(Date.now()/1000);
-                const res = await fetch(`https://api.aladhan.com/v1/timings/${ts}?latitude=${ranchiCoords.lat}&longitude=${ranchiCoords.lon}&method=1`);
+                const res = await fetch(`https://api.aladhan.com/v1/timings/${ts}?latitude=${userCoords.lat}&longitude=${userCoords.lon}&method=${state.calcMethod}&adjustment=${state.hijriAdjustment}`);
                 const json = await res.json();
                 state.prayerData = json.data;
                 const h = state.prayerData.date.hijri;
                 document.getElementById('hijri-display').innerText = `${h.day} ${h.month.en}`;
-                const wRes = await fetch(`https://api.open-meteo.com/v1/forecast?latitude=${ranchiCoords.lat}&longitude=${ranchiCoords.lon}&current_weather=true`);
+                const wRes = await fetch(`https://api.open-meteo.com/v1/forecast?latitude=${userCoords.lat}&longitude=${userCoords.lon}&current_weather=true`);
                 const wData = await wRes.json();
                 document.getElementById('temp-display').innerText = `${Math.round(wData.current_weather.temperature)}°C`;
                 renderPrayers();
-                renderRamadanTable(h.year);
+                
+                const sel = document.getElementById('year-selector');
+                // Auto-select current Hijri year if it exists in options
+                if (sel.querySelector(`option[value="${h.year}"]`)) sel.value = h.year;
+                renderRamadanTable(sel.value);
             } catch(e) { console.error(e); }
         }
 
@@ -407,16 +513,24 @@
         async function renderRamadanTable(year) {
             const cont = document.getElementById('calendar-table-container');
             try {
-                const res = await fetch(`https://api.aladhan.com/v1/hijriCalendarByCity/${year}/9?city=Ranchi&country=India&method=1`);
+                const res = await fetch(`https://api.aladhan.com/v1/hijriCalendar/${year}/9?latitude=${userCoords.lat}&longitude=${userCoords.lon}&method=${state.calcMethod}&adjustment=${state.hijriAdjustment}`);
                 const json = await res.json();
                 let html = `<table class="ramadan-table"><tr><th>Day</th><th>Date</th><th>Sehri</th><th>Iftar</th></tr>`;
                 const todayG = new Date().getDate();
                 const todayM = new Date().getMonth() + 1;
+                const reminders = JSON.parse(localStorage.getItem('rp_reminders')) || {};
                 json.data.forEach(d => {
-                    const active = parseInt(d.gregorian.day) === todayG && d.gregorian.month.number === todayM;
-                    html += `<tr class="${active ? 'today' : ''}"><td>Day ${d.hijri.day}</td><td>${d.gregorian.day} ${d.gregorian.month.en.slice(0,3)}</td><td>${d.timings.Fajr.split(' ')[0]}</td><td>${d.timings.Maghrib.split(' ')[0]}</td></tr>`;
+                    const dDay = parseInt(d.gregorian.day);
+                    const hDay = parseInt(d.hijri.day);
+                    const dateKey = d.gregorian.date;
+                    const iftar = d.timings.Maghrib.split(' ')[0];
+                    const active = dDay === todayG && d.gregorian.month.number === todayM;
+                    const last10 = hDay >= 21;
+                    const isRem = reminders[dateKey];
+                    html += `<tr class="${active ? 'today' : ''} ${last10 ? 'last-10' : ''} ${isRem ? 'reminder-set' : ''}" onclick="toggleReminder('${dateKey}', '${iftar}', this)" ${active ? 'id="active-row"' : ''}><td>Day ${d.hijri.day} ${last10 ? '<i class="fas fa-moon" style="font-size:0.6rem; color:var(--indigo); margin-left:4px;" title="Last 10 Days"></i>' : ''}</td><td>${d.gregorian.day} ${d.gregorian.month.en.slice(0,3)}</td><td>${d.timings.Fajr.split(' ')[0]}</td><td>${iftar} ${isRem ? '<i class="fas fa-bell" style="font-size:0.7rem; color:var(--emerald); margin-left:4px;"></i>' : ''}</td></tr>`;
                 });
                 cont.innerHTML = html + `</table>`;
+                const ar = document.getElementById('active-row'); if(ar) ar.scrollIntoView({behavior:'smooth', block:'center'});
             } catch(e) { cont.innerHTML = "Unavailable"; }
         }
 
@@ -466,8 +580,94 @@
             notify(state.adhanEnabled ? 'Adhan Enabled' : 'Adhan Disabled');
         }
 
+        function openSettings() { 
+            document.getElementById('settings-modal').classList.add('active'); 
+            document.getElementById('hijri-adj-val').innerText = state.hijriAdjustment; 
+            document.getElementById('calc-method-select').value = state.calcMethod;
+        }
+        function closeSettings() { document.getElementById('settings-modal').classList.remove('active'); }
+        function adjustHijri(v) {
+            state.hijriAdjustment += v;
+            document.getElementById('hijri-adj-val').innerText = state.hijriAdjustment > 0 ? `+${state.hijriAdjustment}` : state.hijriAdjustment;
+            localStorage.setItem('rp_adj', state.hijriAdjustment);
+            refreshData();
+            notify(`Hijri Offset: ${state.hijriAdjustment}`);
+        }
+        function changeMethod(v) {
+            state.calcMethod = parseInt(v);
+            localStorage.setItem('rp_method', state.calcMethod);
+            refreshData();
+            notify("Method Updated");
+        }
+
+        function toggleReminder(date, time, row) {
+            let reminders = JSON.parse(localStorage.getItem('rp_reminders')) || {};
+            const lastTd = row.cells[3];
+            if (reminders[date]) {
+                delete reminders[date];
+                row.classList.remove('reminder-set');
+                const icon = lastTd.querySelector('.fa-bell'); if(icon) icon.remove();
+                notify(`Reminder removed`);
+            } else {
+                if(Notification.permission !== "granted") Notification.requestPermission();
+                reminders[date] = time;
+                row.classList.add('reminder-set');
+                if(!lastTd.querySelector('.fa-bell')) lastTd.innerHTML += ' <i class="fas fa-bell" style="font-size:0.7rem; color:var(--emerald); margin-left:4px;"></i>';
+                notify(`Reminder set for ${time}`);
+            }
+            localStorage.setItem('rp_reminders', JSON.stringify(reminders));
+        }
+
+        function calcZakat() {
+            const ids = ['z-savings', 'z-gold', 'z-silver', 'z-invest'];
+            let total = 0;
+            ids.forEach(id => { total += parseFloat(document.getElementById(id).value) || 0; });
+            const zakat = total * 0.025;
+            document.getElementById('zakat-total').innerText = zakat.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+        }
+
+        function downloadCalendar() {
+            const element = document.getElementById('calendar-table-container');
+            notify("Generating Image...");
+            html2canvas(element, { backgroundColor: "#0f172a", scale: 2 }).then(canvas => {
+                const link = document.createElement('a');
+                link.download = `Ramadan_Calendar_${new Date().getFullYear()}.png`;
+                link.href = canvas.toDataURL();
+                link.click();
+                notify("Download Started");
+            }).catch(() => notify("Download Failed"));
+        }
+
+        function getUserLocation() {
+            const saved = JSON.parse(localStorage.getItem('rp_location'));
+            if(saved) {
+                userCoords = saved.coords;
+                document.getElementById('location-label').innerText = `${saved.city} Fasting Progress`;
+                document.getElementById('location-sub').innerText = `${saved.city}, ${saved.country}`;
+                document.getElementById('table-title').innerText = `${saved.city} Ramadan Table`;
+                refreshData();
+            }
+            if (navigator.geolocation) {
+                navigator.geolocation.getCurrentPosition(async (pos) => {
+                    userCoords = { lat: pos.coords.latitude, lon: pos.coords.longitude };
+                    refreshData();
+                    try {
+                        const res = await fetch(`https://api.bigdatacloud.net/data/reverse-geocode-client?latitude=${userCoords.lat}&longitude=${userCoords.lon}&localityLanguage=en`);
+                        const data = await res.json();
+                        const city = data.city || data.locality || "Local";
+                        const country = data.countryCode || '';
+                        document.getElementById('location-label').innerText = `${city} Fasting Progress`;
+                        document.getElementById('location-sub').innerText = `${city}, ${country}`;
+                        document.getElementById('table-title').innerText = `${city} Ramadan Table`;
+                        localStorage.setItem('rp_location', JSON.stringify({ coords: userCoords, city, country }));
+                    } catch(e) { if(!saved) document.getElementById('location-sub').innerText = "Local Location"; }
+                }, () => { if(!saved) { notify("Location denied. Using Default."); refreshData(); } });
+            } else { if(!saved) refreshData(); }
+        }
+
         async function init() {
-            renderChecklist(); initQuran(); refreshData(); setInterval(tick, 1000);
+            renderChecklist(); initQuran(); getUserLocation(); setInterval(tick, 1000);
+            document.getElementById('missed-val').innerText = state.missedFasts;
             document.getElementById('ai-query').onkeypress = async (e) => { 
                 if(e.key === 'Enter') { 
                     const b = document.getElementById('ai-response-box'); b.innerHTML = `<span class="loading-dots">Searching</span>`; 
